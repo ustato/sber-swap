@@ -1,0 +1,10 @@
+version: '2'
+services:
+  admin:
+    container_name: sber-swap-streamlit
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile
+    image: sber-swap-streamlit
+    ports:
+      - "8501:8501"
