@@ -87,7 +87,8 @@ def crop_frames_and_get_transforms(full_frames: List[np.ndarray],
                 netArc: Callable,
                 crop_size: int,
                 set_target: bool,
-                similarity_th: float) -> Tuple[List[Any], List[Any]]:
+                similarity_th: float,
+                gpu=True) -> Tuple[List[Any], List[Any]]:
     """
     Crop faces from frames and get respective tranforms
     """
@@ -100,7 +101,7 @@ def crop_frames_and_get_transforms(full_frames: List[np.ndarray],
         try:
             faces, tfms = app.get(frame, crop_size)
             if len(faces) > 1 or set_target:
-                face_norm = normalize_and_torch_batch(np.array(faces))
+                face_norm = normalize_and_torch_batch(np.array(faces), gpu=gpu)
                 face_norm = F.interpolate(face_norm, scale_factor=0.5, mode='bilinear', align_corners=True)
                 face_embeds = netArc(face_norm)
                 face_embeds = F.normalize(face_embeds)

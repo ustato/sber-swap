@@ -14,7 +14,7 @@ def transform_target_to_torch(resized_frs: np.ndarray, half=True) -> torch.tenso
     """
     Transform target, so it could be used by model
     """
-    target_batch_rs = torch.from_numpy(resized_frs.copy()).cuda()
+    target_batch_rs = torch.from_numpy(resized_frs.copy()).cuda() if half else torch.from_numpy(resized_frs.copy())
     target_batch_rs = target_batch_rs[:, :, :, [2,1,0]]/255.
         
     if half:
@@ -41,16 +41,16 @@ def model_inference(full_frames: List[np.ndarray],
     Using original frames get faceswaped frames and transofrmations
     """
     # Get Arcface embeddings of target image
-    target_norm = normalize_and_torch_batch(np.array(target))
+    target_norm = normalize_and_torch_batch(np.array(target), gpu=half)
     target_embeds = netArc(F.interpolate(target_norm, scale_factor=0.5, mode='bilinear', align_corners=True))
     
     # Get the cropped faces from original frames and transformations to get those crops
-    crop_frames_list, tfm_array_list = crop_frames_and_get_transforms(full_frames, target_embeds, app, netArc, crop_size, set_target, similarity_th=similarity_th)
+    crop_frames_list, tfm_array_list = crop_frames_and_get_transforms(full_frames, target_embeds, app, netArc, crop_size, set_target, similarity_th=similarity_th, gpu=half)
     
     # Normalize source images and transform to torch and get Arcface embeddings
     source_embeds = []
     for source_curr in source:
-        source_curr = normalize_and_torch(source_curr)
+        source_curr = normalize_and_torch(source_curr, gpu=half)
         source_embeds.append(netArc(F.interpolate(source_curr, scale_factor=0.5, mode='bilinear', align_corners=True)))
     
     final_frames_list = []
